@@ -7,7 +7,7 @@ import { HDRCubeTextureLoader } from 'https://cdn.jsdelivr.net/npm/three@0.124.0
 import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.124.0/examples/jsm/loaders/GLTFLoader.js';
 import { RGBELoader } from 'https://cdn.jsdelivr.net/npm/three@0.124.0/examples/jsm/loaders/RGBELoader.js';
 import { FlakesTexture } from 'https://cdn.jsdelivr.net/npm/three@0.124.0/examples/jsm/textures/FlakesTexture.js';
-
+import { GUI } from 'https://cdn.jsdelivr.net/npm/three@0.124.0/examples/jsm/libs/dat.gui.module.js';
 // declare variables to store scene, camera, and renderer
 
 
@@ -20,10 +20,13 @@ import { FlakesTexture } from 'https://cdn.jsdelivr.net/npm/three@0.124.0/exampl
 
 
     
-   // window.addEventListener( 'click', onClick, false);
+   window.addEventListener( 'click', onClick, false);
 
     const model = 'plant.3dm'
-    let scene, camera, renderer, controls, raycaster,  pointlight;
+  
+
+
+    let scene, camera, renderer, controls, raycaster, gui, pointlight;
 
   
     const mouse = new THREE.Vector2()
@@ -119,7 +122,7 @@ import { FlakesTexture } from 'https://cdn.jsdelivr.net/npm/three@0.124.0/exampl
         
 
         let mainMat = new THREE.MeshPhysicalMaterial(shapeMat); 
-
+        
 
             //load the model
         const loader = new Rhino3dmLoader()
@@ -137,9 +140,9 @@ import { FlakesTexture } from 'https://cdn.jsdelivr.net/npm/three@0.124.0/exampl
                     
             })
             scene.add( object )
-
+            initGUI( object.userData.layers );
          } )
-
+         
 
       });
     }
@@ -240,10 +243,43 @@ import { FlakesTexture } from 'https://cdn.jsdelivr.net/npm/three@0.124.0/exampl
 }
 
 
+function initGUI( layers ) {
 
+  gui = new GUI( { title: 'layers' } );
 
+  for ( let i = 0; i < layers.length; i ++ ) {
 
+      const layer = layers[ i ];
+      gui.add( layer, 'visible' ).name( layer.name ).onChange( function ( val ) {
 
+          const name = this.object.name;
+
+          scene.traverse( function ( child ) {
+
+              if ( child.userData.hasOwnProperty( 'attributes' ) ) {
+
+                  if ( 'layerIndex' in child.userData.attributes ) {
+
+                      const layerName = layers[ child.userData.attributes.layerIndex ].name;
+
+                      if ( layerName === name ) {
+
+                          child.visible = val;
+                          layer.visible = val;
+
+                      }
+
+                  }
+
+              }
+
+          } );
+
+      } );
+
+  }
+
+}
 
 
 
@@ -256,7 +292,7 @@ import { FlakesTexture } from 'https://cdn.jsdelivr.net/npm/three@0.124.0/exampl
     
     init();
     animate();
-
+    
     
 
 
