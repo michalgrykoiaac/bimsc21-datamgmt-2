@@ -32,9 +32,15 @@ import { FlakesTexture } from 'https://cdn.jsdelivr.net/npm/three@0.124.0/exampl
 
         // Rhino models are z-up, so set this as the default
         THREE.Object3D.DefaultUp = new THREE.Vector3( 0, 0, 1 )
+
+       
+        let INTERSECTED;
+
+
+        
+     
+        
     
-
-
 
 
 
@@ -53,8 +59,8 @@ import { FlakesTexture } from 'https://cdn.jsdelivr.net/npm/three@0.124.0/exampl
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.25;
 
-      camera = new THREE.PerspectiveCamera(50,window.innerWidth/window.innerHeight,1,1000);
-      camera.position.set(0,0,30);
+      camera = new THREE.PerspectiveCamera(30,window.innerWidth/window.innerHeight,1,1000);
+      camera.position.set(0,0,60);
 
 
   
@@ -89,6 +95,8 @@ import { FlakesTexture } from 'https://cdn.jsdelivr.net/npm/three@0.124.0/exampl
 
       let envmaploader = new THREE.PMREMGenerator(renderer);
 
+   
+
       new RGBELoader().setPath('textures/').load('chinese_garden_4k.hdr', function(hdrmap) {
 
         let envmap = envmaploader.fromCubemap(hdrmap);
@@ -109,7 +117,7 @@ import { FlakesTexture } from 'https://cdn.jsdelivr.net/npm/three@0.124.0/exampl
           envMap: envmap.texture
         };
         
-        
+
         let mainMat = new THREE.MeshPhysicalMaterial(shapeMat); 
 
 
@@ -137,6 +145,8 @@ import { FlakesTexture } from 'https://cdn.jsdelivr.net/npm/three@0.124.0/exampl
     }
 
 
+
+
     function onClick( event ) {
 
       console.log( `click! (${event.clientX}, ${event.clientY})`)
@@ -155,15 +165,38 @@ import { FlakesTexture } from 'https://cdn.jsdelivr.net/npm/three@0.124.0/exampl
       let container = document.getElementById( 'container' )
       if (container) container.remove()
   
-      // reset object colours
+      
 
 
 
-      scene.traverse((child, i) => {
-          if (child.isMesh) {
-            child.material.emissive.setHex( 0xff5000 );
-          }
-      });
+      // find intersections
+
+
+  if ( intersects.length > 0 ) {
+
+    if ( INTERSECTED != intersects[ 0 ].object ) {
+
+      if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+
+      INTERSECTED = intersects[ 0 ].object;
+      INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+      INTERSECTED.material.emissive.setHex( 0xff0000 );
+
+    }
+
+  } else {
+
+    if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+
+    INTERSECTED = null;
+
+  }
+
+
+
+
+
+
   
       if (intersects.length > 0) {
   
@@ -171,7 +204,7 @@ import { FlakesTexture } from 'https://cdn.jsdelivr.net/npm/three@0.124.0/exampl
           const object = intersects[0].object
           console.log(object) // debug
   
-          object.material.emissive.setHex( 0xff0000 );
+          
   
           // get user strings
           let data, count
@@ -205,9 +238,6 @@ import { FlakesTexture } from 'https://cdn.jsdelivr.net/npm/three@0.124.0/exampl
       }
 
 }
-
-
-
 
 
 
